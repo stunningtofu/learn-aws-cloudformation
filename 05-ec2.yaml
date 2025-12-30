@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 Private Instance with Nginx and SSM
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: ami-0c02fb55956c7d316 # Amazon Linux 2 (sesuaikan region)
+      SubnetId: !ImportValue PrivateSubnetId
+      SecurityGroupIds:
+        - !ImportValue EC2SG
+      IamInstanceProfile: !ImportValue EC2InstanceProfile
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum install -y nginx
+          systemctl enable nginx
+          systemctl start nginx
+
+  AttachToTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroupAttachment
+    Properties:
+      TargetGroupArn: !ImportValue TargetGroupArn
+      TargetId: !Ref EC2Instance
+      Port: 80

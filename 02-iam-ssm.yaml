@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: IAM Role for EC2 SSM Access
+
+Resources:
+  EC2SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ec2-ssm-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2SSMRole
+
+Outputs:
+  InstanceProfile:
+    Value: !Ref InstanceProfile
+    Export:
+      Name: EC2InstanceProfile
